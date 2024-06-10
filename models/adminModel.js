@@ -1,6 +1,4 @@
 const mongoose = require("mongoose");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
 
 const adminSchema = new mongoose.Schema(
   {
@@ -32,35 +30,35 @@ const adminSchema = new mongoose.Schema(
       required: [true, "Please add a password"],
       minLength: [6, "Password must be at least 8 character"],
     },
-    forgotPasswordToken: String,
-    forgotPasswordExpiry: Date,
 
-    // otp: { type: String, trim: true },
-    // otpExpiredAt: { type: Date, trim: true },
-    // status: { type: Boolean, default: true },
-    // isDeleted: { type: Boolean, default: false },
-    // jwtToken: { type: String },
-    // jwtTokenExpireAt: { type: Date, trim: true },
+    otp: { type: String, trim: true },
+    otpExpiredAt: { type: Date, trim: true },
+    status: { type: Boolean, default: true },
+    isDeleted: { type: Boolean, default: false },
+    jwtToken: { type: String },
+    jwtTokenExpireAt: { type: Date, trim: true },
   },
   {
     timestamps: true,
-    // toObject: {
-    //   transform: (doc, ret, option) => {
-    //     delete ret.__v;
-    //     delete ret.password;
-    //     delete ret.otp;
-    //     delete ret.otpExpiredAt;
-    //     delete ret.jwtToken;
-    //     delete ret.jwtTokenExpireAt;
-    //   },
-    // },
+    toObject: {
+      transform: (ret, doc, option) => {
+        delete doc.__v;
+        delete doc.password;
+        delete doc.otp;
+        delete doc.otpExpiredAt;
+        delete doc.jwtToken;
+        delete doc.jwtTokenExpireAt;
+        return doc;
+      },
+    },
   }
 );
 
-// adminSchema.pre("save", async function (next) {
-//   if (!this.isModified("password")) return next();
+adminSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return next();
 
-//   this.password = await bcrypt.hash(this.password, 10);
-// });
+  this.password = await bcrypt.hash(this.password, 10);
+  next();
+});
 
 module.exports = mongoose.model("admin", adminSchema);

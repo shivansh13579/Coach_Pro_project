@@ -1,32 +1,36 @@
-let abc = [1, 2, 3, 4, 5];
+// let abc = [1, 2, 3, 4, 5];
 
-let xyz = abc;
+// let xyz = abc;
 
-xyz.push(6);
+// xyz.push(6);
 
-let a = 10;
-let b = a;
-b = 20;
+// let a = 10;
+// let b = a;
+// b = 20;
 
-let emp = {
-  name: "shivam",
-  email: "shivansh12@gmail.com",
-  address: {
-    city: "purnea",
-    state: "Bihar",
-  },
-};
+// let emp = {
+//   name: "shivam",
+//   email: "shivansh12@gmail.com",
+//   address: {
+//     city: "purnea",
+//     state: "Bihar",
+//   },
+// };
 
-let newemp = { age: 26, ...emp };
+// let newemp = { age: 26, ...emp };
 
-newemp.name = "bikash sir";
-newemp.address.city = "patna";
-newemp.address.userId = 9;
+// newemp.name = "bikash sir";
+// newemp.address.city = "patna";
+// newemp.address.userId = 9;
 
-console.log(emp);
-console.log(newemp);
+// console.log(emp);
+// console.log(newemp);
 
-console.log(xyz);
-console.log(abc);
+// console.log(xyz);
+// console.log(abc);
 // console.log(a);
 // console.log(b);
+
+const x = Math.floor(Math.random() * (9999 - 1000));
+
+console.log(x);

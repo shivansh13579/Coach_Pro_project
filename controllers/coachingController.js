@@ -1,8 +1,8 @@
-const adminService = require("../services/adminService");
+const coachingService = require("../services/coachingServices");
 
-module.exports.registerAdmin = async (req, res) => {
+module.exports.registerCoaching = async (req, res) => {
   try {
-    const serviceResponse = await adminService.registerAdmin(req.body);
+    const serviceResponse = await coachingService.registerCoaching(req.body);
 
     res.status(serviceResponse.status).send(serviceResponse);
   } catch (error) {
@@ -10,20 +10,24 @@ module.exports.registerAdmin = async (req, res) => {
   }
 };
 
-module.exports.loginAdmin = async (req, res) => {
+module.exports.loginCoaching = async (req, res) => {
   try {
-    const serviceResponse = await adminService.loginAdmin(req.body);
+    const serviceResponse = await coachingService.loginCoaching(req.body);
+
     res.status(serviceResponse.status).send(serviceResponse);
   } catch (error) {
     res.status(500).send({ message: error.message });
   }
 };
 
-module.exports.updateAdmin = async (req, res) => {
+module.exports.updateCoaching = async (req, res) => {
   try {
     const { id } = req.params;
-    updateData = req.body;
-    const serviceResponse = await adminService.updateAdmin(id, updateData);
+    const updateData = req.body;
+    const serviceResponse = await coachingService.updateCoaching(
+      id,
+      updateData
+    );
     res.status(serviceResponse.status).send(serviceResponse);
   } catch (error) {
     res.status(500).send({ message: error.message });
@@ -32,7 +36,7 @@ module.exports.updateAdmin = async (req, res) => {
 
 module.exports.forgotPassword = async (req, res) => {
   try {
-    const serviceResponse = await adminService.forgotPassword(req.body);
+    const serviceResponse = await coachingService.forgotPassword(req.body);
     res.status(serviceResponse.status).send(serviceResponse);
   } catch (error) {
     res.status(500).send({ message: error.message });
@@ -42,9 +46,10 @@ module.exports.forgotPassword = async (req, res) => {
 module.exports.verifyForgotPasswordOtp = async (req, res) => {
   try {
     const { otp } = req.body;
-    const admin = req.admin;
-    const serviceResponse = await adminService.verifyForgotPasswordOtp({
-      admin,
+    const coaching = req.coaching;
+
+    const serviceResponse = await coachingService.verifyForgotPasswordOtp({
+      coaching,
       otp,
     });
     res.status(serviceResponse.status).send(serviceResponse);
@@ -55,8 +60,8 @@ module.exports.verifyForgotPasswordOtp = async (req, res) => {
 
 module.exports.updatePassword = async (req, res) => {
   try {
-    const serviceResponse = await adminService.updatePassword({
-      admin: req.admin,
+    const serviceResponse = await coachingService.updatePassword({
+      coaching: req.coaching,
       ...req.body,
     });
     res.status(serviceResponse.status).send(serviceResponse);
