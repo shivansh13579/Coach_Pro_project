@@ -2,7 +2,6 @@ const serverResponse = require("../constants/serverResponse");
 const { commanMessage, standardMessage } = require("../constants/message");
 const lodash = require("lodash");
 const Standard = require("../models/standardModel");
-const { constants } = require("crypto");
 
 module.exports.create = async (serviceData) => {
   const response = lodash.cloneDeep(serverResponse);
@@ -10,17 +9,17 @@ module.exports.create = async (serviceData) => {
   try {
     const existStandard = await Standard.findOne({
       coaching: serviceData.coaching,
-      name: serviceData.name,
+      standardName: serviceData.standardName,
     });
 
     if (existStandard) {
       response.message = standardMessage.STANDARD_EXIST;
-      response.errors.name = `${serviceData.name} already exists`;
+      response.errors.standardName = `${serviceData.standardName} already exists`;
       return response;
     }
 
     const standard = await Standard.create({
-      name: serviceData.name,
+      standardName: serviceData.standardName,
       description: serviceData.description,
       coaching: serviceData.coaching,
     });
@@ -39,12 +38,19 @@ module.exports.create = async (serviceData) => {
   }
 };
 
-module.exports.update = async (id, updateData) => {
+module.exports.update = async (serviceData, updateData) => {
   const response = lodash.cloneDeep(serverResponse);
   try {
-    const standard = await Standard.findByIdAndUpdate(id, updateData, {
-      new: true,
-    });
+    const standard = await Standard.findByIdAndUpdate(
+      {
+        _id: serviceData.id,
+        coaching: serviceData.coaching,
+      },
+      updateData,
+      {
+        new: true,
+      }
+    );
 
     if (!standard) {
       response.errors.error = standardMessage.STANDARD_NOT_FOUND;
@@ -68,7 +74,10 @@ module.exports.update = async (id, updateData) => {
 module.exports.findOne = async (serviceData) => {
   const response = lodash.cloneDeep(serverResponse);
   try {
-    const standard = await Standard.findOne({ _id: serviceData.id });
+    const standard = await Standard.findOne({
+      _id: serviceData.id,
+      coaching: serviceData.coaching,
+    });
 
     if (!standard) {
       response.errors.error = standardMessage.STANDARD_NOT_FOUND;
@@ -93,23 +102,28 @@ module.exports.findAll = async ({
   page = 1,
   status = true,
   searchQuery,
+  coaching,
 }) => {
   const response = lodash.cloneDeep(serverResponse);
 
   let conditions = {
     isDeleted: false,
+    coaching,
   };
 
   if (searchQuery) {
     const searchRegex = { $regex: searchQuery, $options: "i" };
 
-    conditions.$or = [{ name: searchRegex }, { description: searchRegex }];
+    conditions.$or = [
+      { standardName: searchRegex },
+      { description: searchRegex },
+    ];
   }
 
   if (status == "All") {
     delete conditions.status;
   } else {
-    conditions.status = status;
+    conditions.status = status == "false" ? false : true;
   }
 
   try {
@@ -120,7 +134,7 @@ module.exports.findAll = async ({
     const standard = await Standard.find(conditions)
       .populate({
         path: "coaching",
-        select: "_id name",
+        select: "_id coachingName",
       })
       .sort({ _id: -1 })
       .skip((parseInt(page) - 1) * parseInt(limit))
@@ -147,9 +161,12 @@ module.exports.delete = async (serviceData) => {
   const response = lodash.cloneDeep(serverResponse);
 
   try {
-    const standard = await Standard.findByIdAndUpdate(serviceData.id, {
-      isDeleted: true,
-    });
+    const standard = await Standard.findByIdAndUpdate(
+      { _id: serviceData.id, coaching: serviceData.coaching },
+      {
+        isDeleted: true,
+      }
+    );
 
     if (!standard) {
       response.message = commanMessage.INVALID_ID;

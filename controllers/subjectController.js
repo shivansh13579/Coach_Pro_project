@@ -18,7 +18,11 @@ module.exports.update = async (req, res) => {
   try {
     const { id } = req.params;
     const updateData = req.body;
-    const serviceResponse = await subjectService.update(id, updateData);
+    const coaching = req.coaching._id;
+    const serviceResponse = await subjectService.update(
+      { id, coaching },
+      updateData
+    );
     res.status(serviceResponse.status).send(serviceResponse);
   } catch (error) {
     res.status(500).send({ message: error.message });
@@ -28,7 +32,8 @@ module.exports.update = async (req, res) => {
 module.exports.findOne = async (req, res) => {
   try {
     const { id } = req.params;
-    const serviceResponse = await subjectService.findOne({ id });
+    const { _id } = req.coaching;
+    const serviceResponse = await subjectService.findOne({ id, _id });
     res.status(serviceResponse.status).send(serviceResponse);
   } catch (error) {
     res.status(500).send({ message: error.message });
@@ -37,7 +42,11 @@ module.exports.findOne = async (req, res) => {
 
 module.exports.findAll = async (req, res) => {
   try {
-    const serviceResponse = await subjectService.findAll(req.query);
+    const coaching = req.coaching._id;
+    const serviceResponse = await subjectService.findAll({
+      ...req.query,
+      coaching,
+    });
     res.status(serviceResponse.status).send(serviceResponse);
   } catch (error) {
     res.status(500).send({ message: error.message });
@@ -47,7 +56,8 @@ module.exports.findAll = async (req, res) => {
 module.exports.delete = async (req, res) => {
   try {
     const { id } = req.params;
-    const serviceResponse = await subjectService.delete({ id });
+    const coaching = req.coaching._id;
+    const serviceResponse = await subjectService.delete({ id, coaching });
     res.status(serviceResponse.status).send(serviceResponse);
   } catch (error) {
     res.status(500).send({ message: error.message });

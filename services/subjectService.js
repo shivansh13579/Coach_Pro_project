@@ -10,17 +10,17 @@ module.exports.create = async (serviceData) => {
     const existSubject = await Subject.findOne({
       coaching: serviceData.coaching,
       standard: serviceData.standard,
-      name: serviceData.name,
+      subjectName: serviceData.subjectName,
     });
 
     if (existSubject) {
       response.message = subjectMessage.SUBJECT_EXIST;
-      response.errors.name = `${serviceData.name} already exists`;
+      response.errors.subjectName = `${serviceData.subjectName} already exists`;
       return response;
     }
 
     const subject = await Subject.create({
-      name: serviceData.name,
+      subjectName: serviceData.subjectName,
       description: serviceData.description,
       coaching: serviceData.coaching,
       standard: serviceData.standard,
@@ -40,12 +40,16 @@ module.exports.create = async (serviceData) => {
   }
 };
 
-module.exports.update = async (id, updateData) => {
+module.exports.update = async (serviceData, updateData) => {
   const response = lodash.cloneDeep(serverResponse);
   try {
-    const subject = await Subject.findByIdAndUpdate(id, updateData, {
-      new: true,
-    });
+    const subject = await Subject.findByIdAndUpdate(
+      { _id: serviceData.id, coaching: serviceData.coaching },
+      updateData,
+      {
+        new: true,
+      }
+    );
 
     if (!subject) {
       response.errors.error = subjectMessage.SUBJECT_NOT_FOUND;
@@ -71,6 +75,7 @@ module.exports.findOne = async (serviceData) => {
   try {
     const subject = await Subject.findOne({
       _id: serviceData.id,
+      coaching: serviceData._id,
     });
 
     if (!subject) {
@@ -96,16 +101,21 @@ module.exports.findAll = async ({
   page = 1,
   status = true,
   searchQuery,
+  coaching,
 }) => {
   const response = lodash.cloneDeep(serverResponse);
 
   let conditions = {
     isDeleted: false,
+    coaching,
   };
 
   if (searchQuery) {
     const searchRegex = { $regex: searchQuery, $options: "i" };
-    conditions.$or = [{ name: searchRegex }, { description: searchRegex }];
+    conditions.$or = [
+      { subjectName: searchRegex },
+      { description: searchRegex },
+    ];
   }
 
   if (status == "All") {
@@ -122,7 +132,7 @@ module.exports.findAll = async ({
     const subject = await Subject.find(conditions)
       .populate({
         path: "standard",
-        select: "_id name",
+        select: "_id standardName",
       })
       .sort({ _id: -1 })
       .skip((parseInt(page) - 1) * parseInt(limit))
@@ -149,9 +159,15 @@ module.exports.delete = async (serviceData) => {
   const response = lodash.cloneDeep(serverResponse);
 
   try {
-    const subject = await Subject.findByIdAndUpdate(serviceData.id, {
-      isDeleted: true,
-    });
+    const subject = await Subject.findByIdAndUpdate(
+      {
+        _id: serviceData.id,
+        coaching: serviceData._id,
+      },
+      {
+        isDeleted: true,
+      }
+    );
 
     if (!subject) {
       response.message = commanMessage.INVALID_ID;

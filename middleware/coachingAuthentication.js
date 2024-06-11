@@ -5,13 +5,10 @@ const jwt = require("jsonwebtoken");
 const Coaching = require("../models/coachingModel");
 
 module.exports = async (req, res, next) => {
-  console.log("req", req, req.coaching);
   const response = lodash.cloneDeep(serverResponse);
 
   try {
     const authorization = req.headers.authorization;
-
-    console.log(authorization);
 
     if (!authorization) {
       response.errors.error = commanMessage.TOKEN_MISSING;

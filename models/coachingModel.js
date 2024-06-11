@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const coachingSchema = new mongoose.Schema(
   {
-    name: {
+    coachingName: {
       type: String,
       require: true,
     },

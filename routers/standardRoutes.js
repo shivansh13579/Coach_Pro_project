@@ -19,12 +19,7 @@ standardRouter.put(
   standardcontroller.update
 );
 
-standardRouter.get(
-  "/:id",
-  coachingAuthentication,
-  joiSchemaValidation.validateBody(standardValidationSchema.findOne),
-  standardcontroller.findOne
-);
+standardRouter.get("/:id", coachingAuthentication, standardcontroller.findOne);
 
 standardRouter.get(
   "/",

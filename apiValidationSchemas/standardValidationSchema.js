@@ -1,12 +1,12 @@
 const Joi = require("joi");
 
 module.exports.create = Joi.object({
-  name: Joi.string().required().label("Name"),
+  standardName: Joi.string().required().label("Standard"),
   description: Joi.string().required().min(6).label("Description"),
 });
 
 module.exports.update = Joi.object({
-  name: Joi.string().required().label("Name"),
+  standardName: Joi.string().required().label("Standard"),
   description: Joi.string().required().min(6).label("Description"),
 });
 

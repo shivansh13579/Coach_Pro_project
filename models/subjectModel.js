@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const subjectSchema = new mongoose.Schema(
   {
-    name: {
+    subjectName: {
       type: String,
       require: true,
     },
@@ -15,7 +15,7 @@ const subjectSchema = new mongoose.Schema(
     },
     standard: {
       type: mongoose.Types.ObjectId,
-      ref: "coaching",
+      ref: "standard",
     },
     status: { type: Boolean, default: true },
     isDeleted: { type: Boolean, default: false },

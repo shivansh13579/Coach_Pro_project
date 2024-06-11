@@ -42,7 +42,6 @@ module.exports.loginCoaching = async (serviceData) => {
   const response = lodash.cloneDeep(serverResponse);
   try {
     const coaching = await Coaching.findOne({ email: serviceData.email });
-    console.log("coaching", coaching);
 
     if (!coaching) {
       response.errors.error = commanMessage.EMAIL_NOT_MATCHED;
@@ -57,7 +56,7 @@ module.exports.loginCoaching = async (serviceData) => {
 
     if (!isPasswordValid) {
       response.message = commanMessage.PASSWORD_NOT_MATCHED;
-      response.errors = { error: commanMessage.PASSWORD_NOT_MATCHED };
+      response.errors = { password: commanMessage.PASSWORD_NOT_MATCHED };
       return response;
     }
 
@@ -121,7 +120,7 @@ module.exports.forgotPassword = async (serviceData) => {
 
     if (!coaching) {
       response.message = commanMessage.EMAIL_NOT_MATCHED;
-      response.errors = { error: commanMessage.EMAIL_NOT_MATCHED };
+      response.errors = { email: commanMessage.EMAIL_NOT_MATCHED };
     }
 
     const otp = Math.floor(Math.random() * (9999 - 1000));
@@ -163,7 +162,6 @@ module.exports.verifyForgotPasswordOtp = async (serviceData) => {
       otp: serviceData.otp,
       otpExpiredAt: { $gt: Date.now() },
     });
-    console.log("coachingg", coaching);
 
     if (!coaching) {
       response.message = commanMessage.INVALID_ID;
@@ -203,7 +201,7 @@ module.exports.updatePassword = async (serviceData) => {
     const updateData = await coaching.save();
     if (!updateData) {
       response.message = commanMessage.PASSWORD_NOT_UPDATED;
-      response.errors = { error: commanMessage.PASSWORD_NOT_UPDATED };
+      response.errors = { password: commanMessage.PASSWORD_NOT_UPDATED };
       return response;
     }
 
