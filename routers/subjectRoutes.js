@@ -16,13 +16,29 @@ subjectRouter.put(
   "/:id",
   coachingAuthentication,
   joiSchemaValidation.validateBody(subjectValidationSchema.update),
+  joiSchemaValidation.validateParams(subjectValidationSchema.subjectId),
   subjectController.update
 );
 
-subjectRouter.get("/:id", coachingAuthentication, subjectController.findOne);
+subjectRouter.get(
+  "/:id",
+  coachingAuthentication,
+  joiSchemaValidation.validateParams(subjectValidationSchema.subjectId),
+  subjectController.findOne
+);
 
-subjectRouter.get("/", coachingAuthentication, subjectController.findAll);
+subjectRouter.get(
+  "/",
+  coachingAuthentication,
+  joiSchemaValidation.validateQuery(subjectValidationSchema.findAll),
+  subjectController.findAll
+);
 
-subjectRouter.delete("/:id", coachingAuthentication, subjectController.delete);
+subjectRouter.delete(
+  "/:id",
+  coachingAuthentication,
+  joiSchemaValidation.validateParams(subjectValidationSchema.subjectId),
+  subjectController.delete
+);
 
 module.exports = subjectRouter;

@@ -31,3 +31,63 @@ module.exports.validateBody = function (joiSchema) {
     next();
   };
 };
+
+module.exports.validateQuery = function (joiSchema) {
+  return function (req, res, next) {
+    const response = lodash.cloneDeep(serverResponse);
+
+    try {
+      const { error } = joiSchema.validate(req.query, {
+        abortEarly: false,
+      });
+
+      if (error) {
+        const errors = {};
+        for (let err of error.details) {
+          errors[err.path[0]] = err.message;
+        }
+
+        // send response to client
+        response.errors = errors;
+        response.message = commanMessage.VALIDATION_FAILED;
+        return res.status(response.status).send(response);
+      }
+    } catch (error) {
+      response.errors.error = error.message;
+      response.message = commanMessage.VALIDATION_FAILED;
+      return res.status(response.status).send(response);
+    }
+
+    next();
+  };
+};
+
+module.exports.validateParams = function (joiSchema) {
+  return function (req, res, next) {
+    const response = lodash.cloneDeep(serverResponse);
+
+    try {
+      const { error } = joiSchema.validate(req.params, {
+        abortEarly: false,
+      });
+
+      if (error) {
+        const errors = {};
+        for (let err of error.details) {
+          errors[err.path[0]] = err.message;
+        }
+
+        // send response to client
+        response.errors = errors;
+        response.message = commanMessage.VALIDATION_FAILED;
+        return res.status(response.status).send(response);
+      }
+    } catch (error) {
+      response.errors.error = error.message;
+      response.message = commanMessage.VALIDATION_FAILED;
+      return res.status(response.status).send(response);
+    }
+
+    next();
+  };
+};

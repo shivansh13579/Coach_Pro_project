@@ -1,35 +1,33 @@
 const serverResponse = require("../constants/serverResponse");
-const { commanMessage, standardMessage } = require("../constants/message");
+const { commanMessage, batchMessage } = require("../constants/message");
 const lodash = require("lodash");
-const Standard = require("../models/standardModel");
+const Batch = require("../models/batchModel");
 const { formatData } = require("../utils/mongooseUtills");
 
 module.exports.create = async (serviceData) => {
   const response = lodash.cloneDeep(serverResponse);
 
   try {
-    const existStandard = await Standard.findOne({
+    const existBatch = await Batch.findOne({
       coaching: serviceData.coaching,
-      standardName: serviceData.standardName,
+      standard: serviceData.standard,
+      subject: serviceData.subject,
+      batchName: serviceData.batchName,
     });
 
-    if (existStandard) {
-      response.message = standardMessage.STANDARD_EXIST;
-      response.errors.standardName = `${serviceData.standardName} already exists`;
+    if (existBatch) {
+      response.message = batchMessage.BATCH_EXIST;
+      response.errors.batchName = `${serviceData.batchName} already exists`;
       return response;
     }
 
-    const standard = await Standard.create({
-      standardName: serviceData.standardName,
-      description: serviceData.description,
-      coaching: serviceData.coaching,
-    });
+    const batch = await Batch.create(serviceData);
 
-    await standard.save();
+    await batch.save();
 
     response.status = 200;
-    response.message = standardMessage.STANDARD_CREATED;
-    response.body = formatData(standard);
+    response.message = batchMessage.BATCH_CREATED;
+    response.body = formatData(batch);
     return response;
   } catch (error) {
     response.message = commanMessage.SOMETHING_WENT_WRONG;
@@ -41,26 +39,23 @@ module.exports.create = async (serviceData) => {
 module.exports.update = async (serviceData, updateData) => {
   const response = lodash.cloneDeep(serverResponse);
   try {
-    const standard = await Standard.findByIdAndUpdate(
-      {
-        _id: serviceData.id,
-        coaching: serviceData.coaching,
-      },
+    const batch = await Batch.findByIdAndUpdate(
+      { _id: serviceData.id, coaching: serviceData.coaching },
       updateData,
       {
         new: true,
       }
     );
 
-    if (!standard) {
-      response.errors.error = standardMessage.STANDARD_NOT_FOUND;
-      response.message = standardMessage.STANDARD_NOT_FOUND;
+    if (!batch) {
+      response.errors.error = batchMessage.BATCH_NOT_FOUND;
+      response.message = batchMessage.BATCH_NOT_FOUND;
       return response;
     }
 
     response.status = 200;
-    response.message = standardMessage.STANDARD_UPDATED_SUCCESSFULLY;
-    response.body = formatData(standard);
+    response.message = batchMessage.BATCH_UPDATED_SUCCESSFULLY;
+    response.body = formatData(batch);
     return response;
   } catch (error) {
     response.errors = error;
@@ -72,20 +67,20 @@ module.exports.update = async (serviceData, updateData) => {
 module.exports.findOne = async (serviceData) => {
   const response = lodash.cloneDeep(serverResponse);
   try {
-    const standard = await Standard.findOne({
+    const batch = await Batch.findOne({
       _id: serviceData.id,
-      coaching: serviceData.coaching,
+      coaching: serviceData._id,
     });
 
-    if (!standard) {
-      response.errors.error = standardMessage.STANDARD_NOT_FOUND;
-      response.message = standardMessage.STANDARD_NOT_FOUND;
+    if (!batch) {
+      response.errors.error = batchMessage.BATCH_NOT_FOUND;
+      response.message = batchMessage.BATCH_NOT_FOUND;
       return response;
     }
 
     response.status = 200;
-    response.message = standardMessage.STANDARD_GET_SUCCESSFULLY;
-    response.body = formatData(standard);
+    response.message = batchMessage.BATCH_GET_SUCCESSFULLY;
+    response.body = formatData(batch);
     return response;
   } catch (error) {
     response.message = error.message;
@@ -97,24 +92,21 @@ module.exports.findOne = async (serviceData) => {
 module.exports.findAll = async ({
   limit = 10,
   page = 1,
-  status = true,
   searchQuery,
+  status = true,
   coaching,
 }) => {
   const response = lodash.cloneDeep(serverResponse);
 
   let conditions = {
-    isDeleted: false,
+    isDeleted: true,
     coaching,
   };
 
   if (searchQuery) {
-    const searchRegex = { $regex: searchQuery, $options: "i" };
+    const serchRegex = { $regex: searchQuery, $option: "i" };
 
-    conditions.$or = [
-      { standardName: searchRegex },
-      { description: searchRegex },
-    ];
+    conditions.$or = [{ batchName: serchRegex }, { description: serchRegex }];
   }
 
   if (status == "All") {
@@ -124,31 +116,32 @@ module.exports.findAll = async ({
   }
 
   try {
-    const totalRecords = await Standard.countDocuments(conditions);
+    const totalRecords = await Batch.countDocuments(conditions);
 
-    const totalPage = Math.ceil(totalRecords / parseInt(limit));
+    const totalPages = Math.ceil(totalRecords / parseInt(limit));
 
-    const standard = await Standard.find(conditions)
+    const batch = await Batch.find(conditions)
       .populate({
-        path: "coaching",
-        select: "_id coachingName",
+        path: "standard",
+        select: "id standardName",
       })
+      .populate({ path: "subject", select: "id subjectName" })
       .sort({ _id: -1 })
       .skip((parseInt(page) - 1) * parseInt(limit))
       .limit(parseInt(limit));
 
-    if (!standard) {
-      response.errors.error = standardMessage.STANDARD_NOT_FOUND;
-      response.message = standardMessage.STANDARD_NOT_FOUND;
+    if (!batch) {
+      response.message = batchMessage.BATCH_NOT_FOUND;
+      response.errors.error = batchMessage.BATCH_NOT_FOUND;
       return response;
     }
 
     response.status = 200;
-    response.message = standardMessage.STANDARD_GET_SUCCESSFULLY;
-    response.body = formatData(standard);
+    response.message = batchMessage.BATCH_CREATED;
+    response.body = formatData(batch);
     response.page = page;
+    response.totalPages = totalPages;
     response.totalRecords = totalRecords;
-    response.totalPage = totalPage;
     return response;
   } catch (error) {
     response.message = error.message;
@@ -161,20 +154,24 @@ module.exports.delete = async (serviceData) => {
   const response = lodash.cloneDeep(serverResponse);
 
   try {
-    const standard = await Standard.findByIdAndUpdate(
-      { _id: serviceData.id, coaching: serviceData.coaching },
+    const batch = await Batch.findByIdAndUpdate(
+      {
+        _id: serviceData.id,
+        coaching: serviceData._id,
+      },
       {
         isDeleted: true,
       }
     );
 
-    if (!standard) {
+    if (!batch) {
       response.message = commanMessage.INVALID_ID;
       response.errors = { id: commanMessage.INVALID_ID };
+      return response;
     }
 
     response.status = 200;
-    response.message = standardMessage.STANDARD_DELETED;
+    response.message = batchMessage.BATCH_DELETED;
     return response;
   } catch (error) {
     response.message = error.message;

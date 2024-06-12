@@ -16,22 +16,28 @@ standardRouter.put(
   "/:id",
   coachingAuthentication,
   joiSchemaValidation.validateBody(standardValidationSchema.update),
+  joiSchemaValidation.validateParams(standardValidationSchema.standardId),
   standardcontroller.update
 );
 
-standardRouter.get("/:id", coachingAuthentication, standardcontroller.findOne);
+standardRouter.get(
+  "/:id",
+  coachingAuthentication,
+  joiSchemaValidation.validateParams(standardValidationSchema.standardId),
+  standardcontroller.findOne
+);
 
 standardRouter.get(
   "/",
   coachingAuthentication,
-  //   joiSchemaValidation.validateBody(standardValidationSchema.findAll),
+  joiSchemaValidation.validateQuery(standardValidationSchema.findAll),
   standardcontroller.findAll
 );
 
 standardRouter.delete(
   "/:id",
   coachingAuthentication,
-  //   joiSchemaValidation.validateBody(standardValidationSchema.delete),
+  joiSchemaValidation.validateParams(standardValidationSchema.standardId),
   standardcontroller.delete
 );
 

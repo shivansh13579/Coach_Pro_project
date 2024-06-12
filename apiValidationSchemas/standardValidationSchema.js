@@ -1,34 +1,28 @@
 const Joi = require("joi");
+const { validateObjectId } = require("../utils/mongooseUtills");
 
 module.exports.create = Joi.object({
-  standardName: Joi.string().required().label("Standard"),
-  description: Joi.string().required().min(6).label("Description"),
+  standardName: Joi.string().allow("").label("Standard Name"),
+  description: Joi.string().allow("").label("Description"),
 });
 
 module.exports.update = Joi.object({
-  standardName: Joi.string().required().label("Standard"),
-  description: Joi.string().required().min(6).label("Description"),
+  standardName: Joi.string().allow("").label("Standard Name"),
+  description: Joi.string().allow("").label("Description"),
+  standard: Joi.string().allow("").label("Standard"),
 });
 
-// module.exports.findOne = Joi.object({
-//   firstName: Joi.string().label("First Name"),
-//   lastName: Joi.string().label("Last Name"),
-//   email: Joi.string().email().label("Email"),
-//   password: Joi.string().min(6).label("Password"),
-// });
+module.exports.findAll = Joi.object({
+  limit: Joi.string().allow("").label("Limit"),
+  page: Joi.string().allow("").label("Page"),
+  status: Joi.string().allow("").label("Status"),
+  searchQuery: Joi.string().allow("").label("searchQuery"),
+});
 
-// module.exports.findAll = Joi.object({
-//   email: Joi.string().email().required().label("Email"),
-// });
-
-// module.exports.delete = Joi.object({
-//   otp: Joi.string().label("Otp"),
-// });
-
-// module.exports.updatePasswordSchema = Joi.object({
-//   password: Joi.string().min(3).max(15).required(),
-//   confirmPassword: Joi.any()
-//     .valid(Joi.ref("password"))
-//     .required()
-//     .label("Confirm Password"),
-// });
+module.exports.standardId = Joi.object({
+  id: Joi.string()
+    .custom((value, helpers) => {
+      return validateObjectId(value, helpers, "Standard");
+    })
+    .required(),
+});

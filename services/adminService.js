@@ -2,9 +2,10 @@ const Admin = require("../models/adminModel");
 const serverResponse = require("../constants/serverResponse");
 const lodash = require("lodash");
 const { adminMessage, commanMessage } = require("../constants/message");
-const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const sendEmail = require("../utils/sendEmail");
+const bcrypt = require("bcrypt");
+const { formatData } = require("../utils/mongooseUtills");
 
 module.exports.registerAdmin = async function (serviceData) {
   const response = lodash.cloneDeep(serverResponse);
@@ -29,8 +30,7 @@ module.exports.registerAdmin = async function (serviceData) {
 
     response.status = 200;
     response.message = adminMessage.ADMIN_CREATED;
-    const isModified = adminUser.toObject();
-    response.body = isModified;
+    response.body = formatData(adminUser);
     return response;
   } catch (error) {
     response.message = commanMessage.SOMETHING_WENT_WRONG;
@@ -69,10 +69,9 @@ module.exports.loginAdmin = async function (serviceData) {
       expiresIn: process.env.JWT_EXPIRY_TIME,
     });
 
-    const modifiedData = admin.toObject();
     response.status = 200;
     response.message = commanMessage.ADMIN_LOGIN_SUCCESS;
-    response.body = { ...modifiedData, token };
+    response.body = { ...formatData(admin), token };
     return response;
   } catch (error) {
     response.message = error.message;
@@ -105,8 +104,7 @@ module.exports.updateAdmin = async function (id, updateData) {
     if (updateAdmin) {
       response.status = 200;
       response.message = adminMessage.ADMIN_UPDATED;
-      const modifiedData = updateAdmin.toObject();
-      response.body = { ...modifiedData, token };
+      response.body = { ...formatData(updateAdmin), token };
       return response;
     } else {
       response.status = 400;
@@ -151,9 +149,8 @@ module.exports.forgotPassword = async function (serviceData) {
       return response;
     }
 
-    const modifiedData = admin.toObject();
     response.status = 200;
-    response.body = { ...modifiedData, token };
+    response.body = { ...formatData(admin), token };
     return response;
   } catch (error) {
     response.errors.error = error.message;
@@ -181,11 +178,10 @@ module.exports.verifyForgotPasswordOtp = async function (serviceData) {
     });
 
     await admin.save();
-    const modifiedData = admin.toObject();
 
     response.status = 200;
     response.message = commanMessage.VERIFY_OTP;
-    response.body = { ...modifiedData, token };
+    response.body = { ...formatData(admin), token };
     return response;
   } catch (error) {
     response.message = error.message;
@@ -219,10 +215,9 @@ module.exports.updatePassword = async function (serviceData) {
       expiresIn: process.env.JWT_EXPIRY_TIME,
     });
 
-    const modifiedData = updateData.toObject();
     response.status = 200;
     response.message = adminMessage.PASSWORD_UPDATED;
-    response.body = { ...modifiedData, token };
+    response.body = { ...formatData(updateData), token };
     return response;
   } catch (error) {
     response.errors.error = error.message;

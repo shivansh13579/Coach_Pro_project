@@ -37,6 +37,14 @@ module.exports = {
     SUBJECT_UPDATED_SUCCESSFULLY: "Subject Updated successfully",
     SUBJECT_GET_SUCCESSFULLY: "Subject get successfully",
   },
+  batchMessage: {
+    BATCH_CREATED: "Batch Created Successfully !",
+    BATCH_DELETED: "Batch Deleted Successfully !",
+    BATCH_EXIST: "Batch already exist",
+    BATCH_NOT_FOUND: "Batch not found",
+    BATCH_UPDATED_SUCCESSFULLY: "Batch Updated successfully",
+    BATCH_GET_SUCCESSFULLY: "Batch get successfully",
+  },
   coachingMessage: {
     COACHING_CREATED: "Coaching Register Successfully!",
     COACHING_NOT_FOUND: "Coaching not found",

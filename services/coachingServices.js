@@ -5,6 +5,7 @@ const Coaching = require("../models/coachingModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const sendEmail = require("../utils/sendEmail");
+const { formatData } = require("../utils/mongooseUtills");
 
 module.exports.registerCoaching = async (serviceData) => {
   const response = lodash.cloneDeep(serverResponse);
@@ -26,10 +27,9 @@ module.exports.registerCoaching = async (serviceData) => {
 
     await coachingUser.save();
 
-    const isModified = coachingUser.toObject();
     response.status = 200;
     response.message = coachingMessage.COACHING_CREATED;
-    response.body = isModified;
+    response.body = formatData(coachingUser);
     return response;
   } catch (error) {
     response.message = commanMessage.SOMETHING_WENT_WRONG;
@@ -64,11 +64,9 @@ module.exports.loginCoaching = async (serviceData) => {
       expiresIn: process.env.JWT_EXPIRY_TIME,
     });
 
-    const isModified = coaching.toObject();
-
     response.status = 200;
     response.message = commanMessage.COACHING_LOGIN_SUCCESS;
-    response.body = { ...isModified, token };
+    response.body = { ...formatData(coaching), token };
     return response;
   } catch (error) {
     response.errors = error;
@@ -95,10 +93,9 @@ module.exports.updateCoaching = async (id, updateData) => {
     const updateCoaching = await coaching.save();
 
     if (updateCoaching) {
-      const isModified = updateCoaching.toObject();
       response.status = 200;
       response.message = coachingMessage.COACHING_UPDATED;
-      response.body = { ...isModified, token };
+      response.body = { ...formatData(updateCoaching), token };
       return response;
     } else {
       response.errors.error = coachingMessage.COACHING_NOT_UPDATED;
@@ -142,10 +139,9 @@ module.exports.forgotPassword = async (serviceData) => {
       return response;
     }
 
-    const isModified = coaching.toObject();
     response.status = 200;
     response.message = commanMessage.OTP_SEND_SUCCESSFULLY;
-    response.body = { ...isModified, token };
+    response.body = { ...formatData(coaching), token };
     return response;
   } catch (error) {
     response.message = error.message;
@@ -174,10 +170,9 @@ module.exports.verifyForgotPasswordOtp = async (serviceData) => {
 
     await coaching.save();
 
-    const isModified = coaching.toObject();
     response.status = 200;
     response.message = commanMessage.VERIFY_OTP;
-    response.body = { ...isModified, token };
+    response.body = { ...formatData(coaching), token };
     return response;
   } catch (error) {
     response.errors = error;
@@ -199,6 +194,7 @@ module.exports.updatePassword = async (serviceData) => {
     coaching.password = await bcrypt.hash(serviceData.password, 10);
 
     const updateData = await coaching.save();
+
     if (!updateData) {
       response.message = commanMessage.PASSWORD_NOT_UPDATED;
       response.errors = { password: commanMessage.PASSWORD_NOT_UPDATED };
@@ -209,11 +205,9 @@ module.exports.updatePassword = async (serviceData) => {
       expiresIn: process.env.JWT_EXPIRY_TIME,
     });
 
-    const isModified = coaching.toObject();
     response.status = 200;
-    response.body = { ...isModified, token };
+    response.body = { ...formatData(coaching), token };
     response.message = commanMessage.PASSWORD_UPDATED;
-    response.errors = { error: commanMessage.PASSWORD_UPDATED };
     return response;
   } catch (error) {
     response.message = error.message;

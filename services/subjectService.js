@@ -2,6 +2,7 @@ const serverResponse = require("../constants/serverResponse");
 const { commanMessage, subjectMessage } = require("../constants/message");
 const lodash = require("lodash");
 const Subject = require("../models/subjectModel");
+const { formatData } = require("../utils/mongooseUtills");
 
 module.exports.create = async (serviceData) => {
   const response = lodash.cloneDeep(serverResponse);
@@ -28,10 +29,9 @@ module.exports.create = async (serviceData) => {
 
     await subject.save();
 
-    const isModified = subject.toObject();
     response.status = 200;
     response.message = subjectMessage.SUBJECT_CREATED;
-    response.body = isModified;
+    response.body = formatData(subject);
     return response;
   } catch (error) {
     response.message = commanMessage.SOMETHING_WENT_WRONG;
@@ -57,11 +57,9 @@ module.exports.update = async (serviceData, updateData) => {
       return response;
     }
 
-    const isModified = subject.toObject();
-
     response.status = 200;
     response.message = subjectMessage.SUBJECT_UPDATED_SUCCESSFULLY;
-    response.body = isModified;
+    response.body = formatData(subject);
     return response;
   } catch (error) {
     response.errors = error;
@@ -84,10 +82,9 @@ module.exports.findOne = async (serviceData) => {
       return response;
     }
 
-    const isModified = subject.toObject();
     response.status = 200;
     response.message = subjectMessage.SUBJECT_GET_SUCCESSFULLY;
-    response.body = isModified;
+    response.body = formatData(subject);
     return response;
   } catch (error) {
     response.message = error.message;
@@ -127,7 +124,7 @@ module.exports.findAll = async ({
   try {
     const totalRecords = await Subject.countDocuments(conditions);
 
-    const totalPage = Math.ceil(totalRecords / parseInt(limit));
+    const totalPages = Math.ceil(totalRecords / parseInt(limit));
 
     const subject = await Subject.find(conditions)
       .populate({
@@ -146,7 +143,11 @@ module.exports.findAll = async ({
 
     response.status = 200;
     response.message = subjectMessage.SUBJECT_GET_SUCCESSFULLY;
-    response.body = { subject, page, totalRecords, totalPage };
+    response.body = formatData(subject);
+    response.page = page;
+    response.totalPages = totalPages;
+    response.totalRecords = totalRecords;
+
     return response;
   } catch (error) {
     response.message = error.message;

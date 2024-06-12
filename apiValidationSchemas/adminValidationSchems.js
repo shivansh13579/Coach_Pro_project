@@ -1,4 +1,5 @@
 const Joi = require("joi");
+const { validateObjectId } = require("../utils/mongooseUtills");
 
 module.exports.registerAdminSchema = Joi.object({
   firstName: Joi.string().required().label("First Name"),
@@ -33,4 +34,10 @@ module.exports.updatePassword = Joi.object({
     .valid(Joi.ref("password"))
     .required()
     .label("Conformed Password"),
+});
+
+module.exports.adminId = Joi.object({
+  id: Joi.custom((value, helpers) => {
+    return validateObjectId(value, helpers, "Admin");
+  }).required(),
 });

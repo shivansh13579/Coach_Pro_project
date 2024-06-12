@@ -7,48 +7,49 @@ const adminRouter = Router();
 
 // register
 adminRouter.post(
-  "/admins/register",
+  "/register",
   joiSchemaValidation.validateBody(adminValidationSchema.registerAdminSchema),
   adminController.registerAdmin
 );
 
 // login
 adminRouter.post(
-  "/admins/login",
+  "/login",
   joiSchemaValidation.validateBody(adminValidationSchema.loginAdminSchema),
   adminController.loginAdmin
 );
 
 // update
 adminRouter.put(
-  "/admins/update/:id",
-  joiSchemaValidation.validateBody(adminValidationSchema.updateAdminSchema),
+  "/update/:id",
   adminAuthentication,
+  joiSchemaValidation.validateParams(adminValidationSchema.adminId),
+  joiSchemaValidation.validateBody(adminValidationSchema.updateAdminSchema),
   adminController.updateAdmin
 );
 
 // forgotPassword
 adminRouter.post(
-  "/admins/forgotPassword",
+  "/forgotPassword",
   joiSchemaValidation.validateBody(adminValidationSchema.forgotPasswordSchema),
   adminController.forgotPassword
 );
 
 // verifyForgotPasswordOtp
 adminRouter.post(
-  "/admins/verifyForgotPasswordOtp",
+  "/verifyForgotPasswordOtp",
+  adminAuthentication,
   joiSchemaValidation.validateBody(
     adminValidationSchema.verifyForgotPasswordOtp
   ),
-  adminAuthentication,
   adminController.verifyForgotPasswordOtp
 );
 
 // updatePassword
 adminRouter.put(
-  "/admins/updatePassword",
-  joiSchemaValidation.validateBody(adminValidationSchema.updatePassword),
+  "/updatePassword",
   adminAuthentication,
+  joiSchemaValidation.validateBody(adminValidationSchema.updatePassword),
   adminController.updatePassword
 );
 

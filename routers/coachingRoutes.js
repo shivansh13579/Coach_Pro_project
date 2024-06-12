@@ -24,6 +24,7 @@ coachingRouter.post(
 coachingRouter.put(
   "/update/:id",
   coachingAuthentication,
+  joiSchemaValidation.validateParams(coachingValidationSchema.coachingId),
   joiSchemaValidation.validateBody(
     coachingValidationSchema.updateCoachingSchema
   ),
@@ -41,19 +42,19 @@ coachingRouter.post(
 
 coachingRouter.post(
   "/verifyForgotPasswordOtp",
+  coachingAuthentication,
   joiSchemaValidation.validateBody(
     coachingValidationSchema.verifyForgotPasswordOtpSchema
   ),
-  coachingAuthentication,
   coachingController.verifyForgotPasswordOtp
 );
 
 coachingRouter.put(
   "/updatePassword",
+  coachingAuthentication,
   joiSchemaValidation.validateBody(
     coachingValidationSchema.updatePasswordSchema
   ),
-  coachingAuthentication,
   coachingController.updatePassword
 );
 

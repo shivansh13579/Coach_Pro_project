@@ -24,6 +24,15 @@ const coachingSchema = new mongoose.Schema(
       type: String,
       require: true,
     },
+    coachingAddress: {
+      type: String,
+    },
+    directorName: {
+      type: String,
+    },
+    directorMobile: {
+      type: String,
+    },
     otp: { type: String, trim: true },
     otpExpiredAt: { type: Date, trim: true },
     status: { type: Boolean, default: true },
