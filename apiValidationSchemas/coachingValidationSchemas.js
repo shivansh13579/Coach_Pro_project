@@ -1,4 +1,5 @@
 const Joi = require("joi");
+const { validateObjectId } = require("../utils/mongooseUtills");
 
 module.exports.loginCoachingSchema = Joi.object({
   email: Joi.string().email().required().label("Email"),
@@ -16,9 +17,9 @@ module.exports.registerCoachingSchema = Joi.object({
 });
 
 module.exports.updateCoachingSchema = Joi.object({
-  coachingName: Joi.string().required().label("First Name"),
-  email: Joi.string().email().label("Email"),
-  password: Joi.string().min(6).label("Password"),
+  coachingName: Joi.string().allow("").label("First Name"),
+  email: Joi.string().allow("").email().label("Email"),
+  password: Joi.string().allow("").min(6).label("Password"),
   mobile: Joi.string().allow("").label("Mobile"),
 });
 
@@ -39,9 +40,7 @@ module.exports.updatePasswordSchema = Joi.object({
 });
 
 module.exports.coachingId = Joi.object({
-  id: Joi.string()
-    .custom((value, helpers) => {
-      return validateObjectId(value, helpers, "Coaching");
-    })
-    .required(),
+  id: Joi.custom((value, helpers) => {
+    return validateObjectId(value, helpers, "Coaching");
+  }).required(),
 });

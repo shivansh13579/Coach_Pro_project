@@ -45,6 +45,23 @@ module.exports = {
     BATCH_UPDATED_SUCCESSFULLY: "Batch Updated successfully",
     BATCH_GET_SUCCESSFULLY: "Batch get successfully",
   },
+  studentMessage: {
+    STUDENT_CREATED: "Student Created Successfully !",
+    STUDENT_DELETED: "Student Deleted Successfully !",
+    STUDENT_EXIST: "Student already exist",
+    STUDENT_NOT_FOUND: "Student not found",
+    STUDENT_UPDATED_SUCCESSFULLY: "Student Updated successfully",
+    STUDENT_GET_SUCCESSFULLY: "Student get successfully",
+  },
+
+  sessionMessage: {
+    SESSION_CREATED: "Batch Created Successfully !",
+    SESSION_DELETED: "Batch Deleted Successfully !",
+    SESSION_EXIST: "Batch already exist",
+    SESSION_NOT_FOUND: "Batch not found",
+    SESSION_UPDATED_SUCCESSFULLY: "Batch Updated successfully",
+    SESSION_GET_SUCCESSFULLY: "Batch get successfully",
+  },
   coachingMessage: {
     COACHING_CREATED: "Coaching Register Successfully!",
     COACHING_NOT_FOUND: "Coaching not found",

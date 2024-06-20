@@ -3,7 +3,6 @@ const mongoose = require("mongoose");
 // validateObjectId
 module.exports.validateObjectId = (value, helpers, errorMessage) => {
   const valid = mongoose.Types.ObjectId.isValid(value);
-  console.log("valid", valid);
   return !valid ? helpers.message(`Invalid ${errorMessage} ID`) : value;
 };
 

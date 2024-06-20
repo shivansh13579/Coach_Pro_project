@@ -1,33 +1,37 @@
 const serverResponse = require("../constants/serverResponse");
-const { commanMessage, batchMessage } = require("../constants/message");
+const {
+  commanMessage,
+  subjectMessage,
+  sessionMessage,
+} = require("../constants/message");
 const lodash = require("lodash");
-const Batch = require("../models/batchModel");
+const Session = require("../models/sessionModel");
 const { formatData } = require("../utils/mongooseUtills");
 
 module.exports.create = async (serviceData) => {
   const response = lodash.cloneDeep(serverResponse);
 
   try {
-    const existBatch = await Batch.findOne({
+    const existSession = await Session.findOne({
+      sessionName: serviceData.sessionName,
       coaching: serviceData.coaching,
       standard: serviceData.standard,
       subject: serviceData.subject,
-      batchName: serviceData.batchName,
     });
 
-    if (existBatch) {
-      response.message = batchMessage.BATCH_EXIST;
-      response.errors.batchName = `${serviceData.batchName} already exists`;
+    if (existSession) {
+      response.message = sessionMessage.SESSION_EXIST;
+      response.errors.sessionName = `${serviceData.sessionName} already exists`;
       return response;
     }
 
-    const batch = await Batch.create(serviceData);
+    const session = await Session.create(serviceData);
 
-    await batch.save();
+    await session.save();
 
     response.status = 200;
-    response.message = batchMessage.BATCH_CREATED;
-    response.body = formatData(batch);
+    response.message = sessionMessage.SESSION_CREATED;
+    response.body = formatData(session);
     return response;
   } catch (error) {
     response.message = commanMessage.SOMETHING_WENT_WRONG;
@@ -39,7 +43,7 @@ module.exports.create = async (serviceData) => {
 module.exports.update = async (serviceData, updateData) => {
   const response = lodash.cloneDeep(serverResponse);
   try {
-    const batch = await Batch.findByIdAndUpdate(
+    const session = await Session.findByIdAndUpdate(
       { _id: serviceData.id, coaching: serviceData.coaching },
       updateData,
       {
@@ -47,15 +51,15 @@ module.exports.update = async (serviceData, updateData) => {
       }
     );
 
-    if (!batch) {
-      response.errors.error = batchMessage.BATCH_NOT_FOUND;
-      response.message = batchMessage.BATCH_NOT_FOUND;
+    if (!session) {
+      response.errors.error = sessionMessage.SUBJECT_NOT_FOUND;
+      response.message = sessionMessage.SESSION_NOT_FOUND;
       return response;
     }
 
     response.status = 200;
-    response.message = batchMessage.BATCH_UPDATED_SUCCESSFULLY;
-    response.body = formatData(batch);
+    response.message = sessionMessage.SESSION_UPDATED_SUCCESSFULLY;
+    response.body = formatData(session);
     return response;
   } catch (error) {
     response.errors = error;
@@ -67,20 +71,20 @@ module.exports.update = async (serviceData, updateData) => {
 module.exports.findOne = async (serviceData) => {
   const response = lodash.cloneDeep(serverResponse);
   try {
-    const batch = await Batch.findOne({
+    const session = await Session.findOne({
       _id: serviceData.id,
       coaching: serviceData._id,
     });
 
-    if (!batch) {
-      response.errors.error = batchMessage.BATCH_NOT_FOUND;
-      response.message = batchMessage.BATCH_NOT_FOUND;
+    if (!session) {
+      response.errors.error = sessionMessage.SESSION_NOT_FOUND;
+      response.message = sessionMessage.SESSION_NOT_FOUND;
       return response;
     }
 
     response.status = 200;
-    response.message = batchMessage.BATCH_GET_SUCCESSFULLY;
-    response.body = formatData(batch);
+    response.message = sessionMessage.SESSION_GET_SUCCESSFULLY;
+    response.body = formatData(session);
     return response;
   } catch (error) {
     response.message = error.message;
@@ -92,8 +96,8 @@ module.exports.findOne = async (serviceData) => {
 module.exports.findAll = async ({
   limit = 10,
   page = 1,
-  searchQuery,
   status = true,
+  searchQuery,
   coaching,
 }) => {
   const response = lodash.cloneDeep(serverResponse);
@@ -104,9 +108,11 @@ module.exports.findAll = async ({
   };
 
   if (searchQuery) {
-    const serchRegex = { $regex: searchQuery, $options: "i" };
-
-    conditions.$or = [{ batchName: serchRegex }, { description: serchRegex }];
+    const searchRegex = { $regex: searchQuery, $options: "i" };
+    conditions.$or = [
+      { subjectName: searchRegex },
+      { description: searchRegex },
+    ];
   }
 
   if (status == "All") {
@@ -116,32 +122,32 @@ module.exports.findAll = async ({
   }
 
   try {
-    const totalRecords = await Batch.countDocuments(conditions);
+    const totalRecords = await Session.countDocuments(conditions);
 
     const totalPages = Math.ceil(totalRecords / parseInt(limit));
 
-    const batch = await Batch.find(conditions)
+    const session = await Session.find(conditions)
       .populate({
         path: "standard",
         select: "_id standardName",
       })
-      .populate({ path: "subject", select: "_id subjectName" })
       .sort({ _id: -1 })
       .skip((parseInt(page) - 1) * parseInt(limit))
       .limit(parseInt(limit));
 
-    if (!batch) {
-      response.message = batchMessage.BATCH_NOT_FOUND;
-      response.errors.error = batchMessage.BATCH_NOT_FOUND;
+    if (!session) {
+      response.errors.error = sessionMessage.SESSION_NOT_FOUND;
+      response.message = sessionMessage.SESSION_NOT_FOUND;
       return response;
     }
 
     response.status = 200;
-    response.message = batchMessage.BATCH_CREATED;
-    response.body = formatData(batch);
+    response.message = sessionMessage.SESSION_GET_SUCCESSFULLY;
+    response.body = formatData(session);
     response.page = page;
     response.totalPages = totalPages;
     response.totalRecords = totalRecords;
+
     return response;
   } catch (error) {
     response.message = error.message;
@@ -154,7 +160,7 @@ module.exports.delete = async (serviceData) => {
   const response = lodash.cloneDeep(serverResponse);
 
   try {
-    const batch = await Batch.findByIdAndUpdate(
+    const session = await Session.findByIdAndUpdate(
       {
         _id: serviceData.id,
         coaching: serviceData._id,
@@ -164,14 +170,14 @@ module.exports.delete = async (serviceData) => {
       }
     );
 
-    if (!batch) {
+    if (!session) {
       response.message = commanMessage.INVALID_ID;
       response.errors = { id: commanMessage.INVALID_ID };
       return response;
     }
 
     response.status = 200;
-    response.message = batchMessage.BATCH_DELETED;
+    response.message = sessionMessage.SESSION_DELETED;
     return response;
   } catch (error) {
     response.message = error.message;
